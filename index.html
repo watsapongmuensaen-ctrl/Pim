@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมฝึกพิมพ์ดีด: พิมพ์เพลิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Mitr:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root{
@@ -30,7 +30,7 @@
         html, body { height: 100%; overflow: hidden; }
 
         body {
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Sarabun', sans-serif;
             color: var(--ink);
             background:
                 radial-gradient(circle at 12% -5%, var(--bg-b) 0%, transparent 42%),
@@ -54,7 +54,7 @@
             gap: clamp(0.35rem, 1.2vh, 0.75rem);
         }
 
-        .display-font { font-family: 'Mitr', 'Kanit', sans-serif; }
+        .display-font { font-family: 'Mali', 'Sarabun', sans-serif; }
 
         /* ---------- Hero ---------- */
         .hero-mascot {
@@ -137,39 +137,70 @@
         .mascot-badge.state-happy { animation: happy-pop 0.4s ease; }
         .mascot-badge.state-sad { animation: sad-wobble 0.35s ease; }
         .mascot-badge.state-win { animation: win-spin 0.7s ease; }
-        @keyframes happy-pop { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-6deg); } 100% { transform: scale(1); } }
-        @keyframes sad-wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
-        @keyframes win-spin { 0% { transform: scale(1) rotate(0); } 50% { transform: scale(1.4) rotate(15deg); } 100% { transform: scale(1) rotate(0); } }
-
-        .streak-badge {
-            display: flex; align-items: center; gap: 0.3rem;
-            background: #FFF6E0;
-            border: 2px solid var(--sun);
-            border-radius: 999px;
-            padding: 0.2rem 0.75rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #A6740A;
-            opacity: 0.45;
-            transition: opacity 0.2s ease;
-            flex-shrink: 0;
-        }
-        .streak-badge.lit { opacity: 1; }
-        .streak-badge.pop { animation: streak-pop 0.3s ease; }
-        @keyframes streak-pop { 0% { transform: scale(1); } 50% { transform: scale(1.18); } 100% { transform: scale(1); } }
-
-        .text-display {
-            white-space: pre-wrap;
-            line-height: 1.6;
-            font-size: clamp(1.1rem, 4vh, 2rem);
-            word-break: break-word;
-            overflow-y: auto;
-            max-height: 100%;
-        }
-        .char { color: #C9C2D6; transition: color 0.1s; }
+        .char { color: #C9C2D6; transition: color 0.1s; position: relative; }
         .char.correct { color: var(--leaf); font-weight: 600; }
         .char.incorrect { color: var(--berry); text-decoration: underline wavy; }
-        .char.current { border-bottom: 4px solid var(--coral); color: var(--ink); border-radius: 2px; }
+        /* ใช้ text-decoration แทน border-bottom เพื่อป้องกันสระบนและวรรณยุกต์ซ้อนทับกัน */
+        .char.current {
+            color: var(--ink);
+            background-color: #FFF0E6;
+            text-decoration: underline;
+            text-decoration-color: var(--coral);
+            text-decoration-thickness: 4px;
+            text-underline-offset: 6px;
+            border-radius: 4px;
+        }
+        /* ไฮไลท์พิเศษเมื่อตัวปัจจุบันเป็นสระลอยหรือวรรณยุกต์ (เนื่องจากมีความกว้างเป็น 0) */
+        .char.combining-char.current {
+            color: var(--coral-dark);
+            font-weight: 800;
+            text-decoration: none;
+            background-color: transparent;
+            filter: drop-shadow(0 0 4px #FFC93C) drop-shadow(0 0 8px rgba(255, 107, 74, 0.75));
+        }
+        /* สระบนและวรรณยุกต์ใช้ลูกศรชี้ลงด้านบนเหมือนเดิม */
+        .char.combining-char.current.upper-combining::after {
+            content: '▼';
+            position: absolute;
+            top: -1.1em;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.45em;
+            color: var(--coral-dark);
+            animation: pointer-bounce-upper 0.45s infinite alternate;
+            pointer-events: none;
+            line-height: 1;
+        }
+        /* สระล่าง (เช่น ุ, ู) ให้ลูกศรชี้ขึ้นมาจากด้านล่างตรงตำแหน่งสระพอดี */
+        .char.combining-char.current.lower-combining::after {
+            content: '▲';
+            position: absolute;
+            bottom: -1.2em;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.45em;
+            color: var(--coral-dark);
+            animation: pointer-bounce-lower 0.45s infinite alternate;
+            pointer-events: none;
+            line-height: 1;
+        }
+        /* ไฮไลท์พยัญชนะฐานเมื่อต้องพิมพ์สระบน/ล่างหรือวรรณยุกต์ที่เกาะอยู่ */
+        .char.base-active {
+            background-color: #FFF0E6;
+            text-decoration: underline;
+            text-decoration-color: var(--coral);
+            text-decoration-thickness: 4px;
+            text-underline-offset: 6px;
+            border-radius: 4px;
+        }
+        @keyframes pointer-bounce-upper {
+            from { transform: translateY(0) translateX(-50%); }
+            to { transform: translateY(-4px) translateX(-50%); }
+        }
+        @keyframes pointer-bounce-lower {
+            from { transform: translateY(0) translateX(-50%); }
+            to { transform: translateY(4px) translateX(-50%); }
+        }
 
         .confetti-layer {
             position: absolute; inset: 0;
@@ -211,11 +242,11 @@
         .key {
             background: #ffffff;
             border-radius: 9px;
-            padding: clamp(3px, 0.8vh, 8px) 4px;
+            padding: clamp(2px, 0.5vh, 5px) 4px;
             min-width: 52px;
             flex: 1 1 0;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 500;
             box-shadow: 0 3px 0 #d8cfc0;
             transition: all 0.1s;
@@ -223,19 +254,30 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: clamp(34px, 7.2vh, 60px);
+            align-items: center;
+            height: clamp(38px, 7.6vh, 64px);
+        }
+
+        .key .shift-char {
+            font-size: clamp(0.85rem, 1.8vh, 1.15rem);
+            color: var(--ink-soft);
+            line-height: 1.1;
+            font-weight: 600;
+        }
+        .key .base-char {
+            font-size: clamp(1rem, 2.2vh, 1.4rem);
+            color: var(--ink);
+            font-weight: 700;
+            line-height: 1.1;
         }
 
         @media (max-width: 768px) {
-            .key { min-width: 20px; padding: 3px 2px; font-size: 0.75rem; }
-            .key .shift-char { font-size: 0.6rem; }
-            .key .base-char { font-size: 0.85rem; }
+            .key { min-width: 20px; padding: 2px 1px; }
+            .key .shift-char { font-size: 0.7rem; }
+            .key .base-char { font-size: 0.9rem; }
             .finger-thumb { min-width: 110px !important; }
             .key-enter, .key-shift { min-width: 40px !important; }
         }
-
-        .key .shift-char { font-size: 0.75rem; color: var(--ink-soft); }
-        .key .base-char { font-size: 1rem; color: var(--ink); font-weight: 600; }
 
         .key.active {
             transform: translateY(2px);
@@ -264,8 +306,9 @@
         .finger-r4 { border-top: 4px solid #f9a8d4; }
         .finger-thumb { border-top: 4px solid #cbd5e1; }
 
-        .key-enter { min-width: 80px; background: #DCEEFF; }
-        .key-shift { min-width: 90px; background: #F0EBE0; }
+        .key-enter { min-width: 80px; background: #DCEEFF; justify-content: center; }
+        .key-shift { min-width: 90px; background: #F0EBE0; justify-content: center; }
+        #key-Space { justify-content: center; }
 
         @keyframes bounce {
             from { transform: translateY(-2px); }
@@ -278,6 +321,61 @@
             75% { transform: translateX(5px); }
         }
 
+        /* ---------- Start Screen Overlay ---------- */
+        .start-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background:
+                radial-gradient(circle at 15% 15%, var(--bg-b) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, var(--bg-c) 0%, transparent 45%),
+                var(--bg-a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .start-overlay.hidden-screen {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .start-card {
+            background: var(--card);
+            border: 4px solid #FFDFC2;
+            border-radius: 32px;
+            box-shadow: 0 14px 0 rgba(43,33,64,0.06), 0 25px 50px rgba(43,33,64,0.12);
+            max-width: 820px;
+            width: 100%;
+            padding: clamp(1.5rem, 4vh, 2.75rem);
+            text-align: center;
+            animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .level-select-card {
+            border-radius: 24px;
+            padding: 1.4rem 1rem;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .level-select-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 0 rgba(43,33,64,0.08), 0 16px 28px rgba(43,33,64,0.1);
+        }
+        .level-select-card:active {
+            transform: translateY(-2px);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
         }
@@ -285,6 +383,57 @@
 </head>
 
 <body>
+
+    <!-- Start Screen Overlay -->
+    <div id="start-screen" class="start-overlay">
+        <div class="start-card">
+            <div class="mb-2">
+                <span class="hero-mascot" style="font-size: clamp(3.2rem, 7vh, 4.8rem);">🦉</span>
+            </div>
+            <h1 class="display-font font-bold mb-2" style="color:var(--coral-dark); font-size:clamp(2.2rem, 5vh, 3.4rem); line-height: 1.1;">
+                เกมฝึกพิมพ์ดีด: พิมพ์เพลิน
+            </h1>
+            <p class="mb-6 font-medium" style="color:var(--ink-soft); font-size:clamp(1rem, 2.2vh, 1.25rem);">
+                ฝึกพิมพ์สัมผัสภาษาไทยแสนสนุก สำหรับน้องๆ ประถม ✨<br>
+                <span class="text-sm">เลือกระดับความยากที่ต้องการเพื่อเริ่มเล่นได้เลย!</span>
+            </p>
+
+            <!-- Level Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <button onclick="selectLevelFromMenu(1)" class="level-select-card" style="background:#DFF6E8; border-color:#A8E6C3; color:#1B7A45;">
+                    <div class="text-4xl mb-1">🌱</div>
+                    <div class="display-font font-bold text-xl">ระดับที่ 1</div>
+                    <div class="font-semibold text-base">คำพื้นฐาน</div>
+                    <div class="text-xs opacity-80 mt-1">ฝึกพิมพ์คำศัพท์สั้นๆ รอบตัว (100+ คำ)</div>
+                    <span class="mt-2 px-4 py-1 rounded-full text-xs font-bold bg-white shadow-sm" style="color:#1B7A45;">เริ่มเล่น ▶</span>
+                </button>
+
+                <button onclick="selectLevelFromMenu(2)" class="level-select-card" style="background:#DFF0FF; border-color:#A9D6FF; color:#1660A8;">
+                    <div class="text-4xl mb-1">📖</div>
+                    <div class="display-font font-bold text-xl">ระดับที่ 2</div>
+                    <div class="font-semibold text-base">เรื่องราวสั้นๆ</div>
+                    <div class="text-xs opacity-80 mt-1">ฝึกพิมพ์ประโยคบอกเล่าและการเว้นวรรค (50 เรื่อง)</div>
+                    <span class="mt-2 px-4 py-1 rounded-full text-xs font-bold bg-white shadow-sm" style="color:#1660A8;">เริ่มเล่น ▶</span>
+                </button>
+
+                <button onclick="selectLevelFromMenu(3)" class="level-select-card" style="background:#EEE2FF; border-color:#CDB2FF; color:#6B31C4;">
+                    <div class="text-4xl mb-1">📚</div>
+                    <div class="display-font font-bold text-xl">ระดับที่ 3</div>
+                    <div class="font-semibold text-base">บทความยาว</div>
+                    <div class="text-xs opacity-80 mt-1">ฝึกพิมพ์นิทานสนุกๆ หลายบรรทัด (30 เรื่อง)</div>
+                    <span class="mt-2 px-4 py-1 rounded-full text-xs font-bold bg-white shadow-sm" style="color:#6B31C4;">เริ่มเล่น ▶</span>
+                </button>
+            </div>
+
+            <!-- Creator Credit Box -->
+            <div class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full" style="background:#FFF6E9; border: 2px solid #FFE0B5;">
+                <span class="text-lg">👨‍🏫</span>
+                <span class="text-sm md:text-base font-medium" style="color:var(--ink);">
+                    พัฒนาและสร้างสรรค์โดย: <strong class="font-bold" style="color:var(--coral-dark);">ครูวรรษพงษ์ หมื่นแสน</strong>
+                </span>
+            </div>
+        </div>
+    </div>
 
     <div class="app-wrap">
         <!-- Header -->
@@ -295,7 +444,10 @@
         </div>
 
         <!-- Level Selector -->
-        <div class="flex flex-wrap justify-center gap-2 flex-shrink-0">
+        <div class="flex flex-wrap justify-center items-center gap-2 flex-shrink-0">
+            <button onclick="showStartScreen()" class="level-pill px-3 py-1 rounded-full shadow transition text-sm" style="background:#FFF0E6; color:var(--coral-dark); border-color:#FFD2B8;" title="กลับหน้าแรก">
+                🏠 หน้าแรก
+            </button>
             <button onclick="startGame(1)" id="level-btn-1" class="level-pill px-4 py-1 rounded-full shadow transition text-sm" style="background:#DFF6E8; color:#1B7A45;">
                 <span class="pill-check">✓ </span>🌱 ระดับ 1: คำพื้นฐาน
             </button>
@@ -340,14 +492,33 @@
         </div>
 
         <!-- Game Area -->
-        <div id="game-container" class="px-4 py-2 md:px-6 md:py-3 rounded-3xl text-center">
+        <div id="game-container" class="px-4 py-3 md:px-6 md:py-4 rounded-3xl text-center">
             <div class="confetti-layer" id="confetti-layer"></div>
             <div class="game-top-bar">
                 <div class="mascot-badge" id="mascot-badge">🦉</div>
                 <div class="streak-badge" id="streak-badge">🔥 ต่อเนื่อง <span id="streak-count">0</span></div>
             </div>
-            <div id="text-display" class="text-display font-medium" style="color:var(--ink)">กดเลือกระดับเพื่อเริ่มเล่น!</div>
-            <p class="flex-shrink-0" style="color:var(--ink-soft); font-size:clamp(0.65rem,1.3vh,0.8rem); margin-top:0.25rem;">พิมพ์ตามตัวอักษรที่ปรากฏด้านบน หากพิมพ์ผิดหน้าจอจะสั่นและมีเสียงเตือน</p>
+            <div id="text-display" class="text-display font-medium my-auto" style="color:var(--ink)">กดเลือกระดับเพื่อเริ่มเล่น!</div>
+        </div>
+
+        <!-- Comprehension Quiz Modal (Level 3 Post-Game) -->
+        <div id="quiz-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(43, 33, 64, 0.65); backdrop-filter: blur(4px); display: none;">
+            <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4 border-[#CDB2FF] animate-[pop-in_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">
+                <div class="text-4xl mb-2">💡</div>
+                <h3 id="quiz-title" class="display-font font-bold text-2xl mb-1" style="color:#6B31C4;">ทดสอบจับใจความนิทาน</h3>
+                <p class="text-sm font-medium mb-5" style="color:var(--ink-soft);">เก่งมากที่พิมพ์จบแล้ว! มาลองตอบคำถามจากเรื่องที่เพิ่งพิมพ์กันดูสิคะ</p>
+                
+                <div id="quiz-question-box" class="p-4 rounded-2xl mb-5 text-left" style="background:#F4EEFF; border: 2px solid #E3D2FF;">
+                    <div class="text-xs font-bold mb-1" style="color:#6B31C4;">คำถามจากเนื้อเรื่อง:</div>
+                    <div id="quiz-question-text" class="font-semibold text-base md:text-lg" style="color:var(--ink);">กำลังโหลดคำถาม...</div>
+                </div>
+
+                <div id="quiz-options-grid" class="grid grid-cols-1 gap-2.5 mb-4">
+                    <!-- Options injected dynamically -->
+                </div>
+
+                <div id="quiz-feedback" class="text-sm font-bold min-h-[1.5rem] mb-2"></div>
+            </div>
         </div>
 
         <!-- Virtual Keyboard -->
@@ -355,7 +526,7 @@
     </div>
 
     <script>
-        // คลังคำศัพท์และบทความ
+        // คลังคำศัพท์และบทความ พร้อมคำถามจับใจความสำหรับระดับ 3 (3 คำถามต่อเรื่อง)
         const words = {
             1: [
                 "ฟหกด", "เาสว", "แมว", "โรงเรียน", "ดินสอ", "คุณครู", "กระเป๋า", "เพื่อน", "สมุด", "ไม้บรรทัด",
@@ -383,42 +554,250 @@
                 "รถไฟ ปู๊นปู๊น มา แล้ว", "เครื่องบิน บิน สูง ลิบ", "เรือ แล่น กลาง ทะเล", "ฉัน ขี่ จักรยาน สอง ล้อ", "ลุง ขับ รถ บรรทุก"
             ],
             3: [
-                "กาลครั้งหนึ่ง นานมาแล้ว \nมีเต่า กับกระต่าย วิ่งแข่งกัน ในป่าใหญ่ \nกระต่ายประมาท จึงแอบนอนหลับ ใต้ต้นไม้ \nเต่าพยายาม เดินต่อไป ไม่ยอมหยุดพัก \nในที่สุด เต่าก็เข้าเส้นชัย และเป็นผู้ชนะ",
-                "การออมเงิน เป็นสิ่งที่ดีมาก สำหรับเด็กๆ \nเราควร หยอดกระปุกออมสิน ในทุกๆ วัน \nเมื่อกระปุกเต็ม ก็นำเงิน ไปฝากธนาคาร \nเพื่อเก็บเงินไว้ใช้ ในยามที่เราจำเป็น \nการรู้จักประหยัด จะทำให้เรา ไม่ลำบากในอนาคต",
-                "ลูกหมูสามตัว ตัดสินใจ สร้างบ้าน คนละหลัง \nตัวแรกใช้ฟาง ตัวที่สอง ใช้ไม้สร้างบ้าน \nส่วนตัวที่สาม ขยันกว่าใคร จึงใช้อิฐสร้างบ้าน \nเมื่อหมาป่ามาเป่า บ้านอิฐจึงแข็งแรง ไม่พังทลาย \nหมาป่าหมดแรง และต้องยอมแพ้ เดินหนีไปในที่สุด",
-                "ผักและผลไม้ มีวิตามินมากมาย หลายชนิด \nช่วยให้ร่างกายแข็งแรง และขับถ่ายได้สะดวก \nเด็กๆ ทุกคน ควรรับประทานผัก ในทุกๆ มื้อ \nเพื่อให้ร่างกาย เจริญเติบโต และมีภูมิคุ้มกัน \nถ้าเรากินอาหาร ที่มีประโยชน์ เราก็จะไม่ป่วยง่าย",
-                "การดื่มนม ในตอนเช้า ช่วยให้สมองแจ่มใส \nทำให้กระดูก และฟันของเรา แข็งแรงมากยิ่งขึ้น \nนมวัวมีโปรตีน และแคลเซียมสูง มากมาย \nเป็นอาหาร ที่เหมาะสม สำหรับเด็กทุกคน \nอย่าลืม ดื่มนมอย่างน้อย วันละสองแก้ว นะครับ",
-                "ครอบครัวของฉัน มีคุณพ่อ คุณแม่ พี่ชาย และตัวฉัน \nในวันหยุดสุดสัปดาห์ เรามักจะ ไปเที่ยวสวนสัตว์ \nฉันชอบดู ยีราฟคอยาว และช้างตัวใหญ่ กินกล้วย \nพวกเราเดินเล่น ถ่ายรูป และกินไอศกรีม ด้วยกัน \nครอบครัวของเรา มีความสุข และรักกันมาก",
-                "การออกกำลังกาย ทำให้ร่างกาย ของเราแข็งแรง \nเราควรวิ่งเล่น กระโดดเชือก หรือเต้นแอโรบิก \nอย่างน้อยวันละ สามสิบนาที เพื่อสุขภาพที่ดี \nเพื่อให้เหงื่อออก ร่างกายสดชื่น และกระปรี้กระเปร่า \nเด็กๆ ที่ชอบออกกำลังกาย จะอารมณ์ดี ตลอดวัน",
-                "ก่อนนอนทุกคืน เราต้องแปรงฟัน ให้สะอาด \nเพื่อป้องกันฟันผุ และแมงกินฟัน ในช่องปาก \nบีบยาสีฟัน ลงบนแปรง เท่าเมล็ดถั่วเขียว \nแล้วแปรงขึ้นลง ให้สะอาด ทั่วทุกซอกทุกมุม \nตื่นเช้ามา ลมหายใจของเรา จะได้หอมสดชื่น",
-                "ฉันมีสุนัขแสนรู้ ตัวหนึ่ง ชื่อว่าเจ้าด่าง \nมันชอบวิ่งเก็บ ลูกบอลสีแดง ที่ฉันโยนไปไกลๆ \nเวลาที่ฉัน กลับมาจากโรงเรียน ในตอนเย็น \nมันจะกระดิกหาง และวิ่งมารอรับ ที่หน้าบ้านเสมอ \nเจ้าด่าง เป็นเพื่อนเล่น ที่ซื่อสัตย์ ของฉัน",
-                "ประเทศไทยของเรา แบ่งออกเป็น สามฤดูหลักๆ \nคือฤดูร้อน ฤดูฝน และฤดูหนาว ที่แสนเย็นสบาย \nในฤดูฝน ต้นไม้ใบหญ้า จะเขียวชอุ่ม สวยงาม \nส่วนฤดูหนาว ผู้คนจะสวมเสื้อกันหนาว สีสันสดใส \nฉันรักประเทศไทย เพราะมีธรรมชาติ ที่อุดมสมบูรณ์",
-                "ราชสีห์ตัวใหญ่ กำลังนอนหลับ อยู่ใต้ต้นไม้ \nมีหนูตัวหนึ่ง วิ่งซุกซน ข้ามตัวของราชสีห์ \nราชสีห์ตื่นขึ้นมา ด้วยความโกรธ และจับหนูไว้ \nหนูร้องขอชีวิต และสัญญาว่า จะกลับมาตอบแทนคุณ \nต่อมา หนูก็ได้ช่วยกัดบ่วงแร้ว ช่วยชีวิตราชสีห์ไว้ได้จริงๆ",
-                "กบฝูงหนึ่ง อาศัยอยู่ในบึง และอยากได้เจ้านาย \nเทวดาจึง ทิ้งขอนไม้ท่อนใหญ่ ลงมาให้พวกมัน \nกบไม่พอใจ และเรียกร้อง อยากได้เจ้านายที่เก่งกว่านี้ \nเทวดาโมโห จึงส่งนกกระสา ลงมาที่บึงแห่งนั้น \nนกกระสา จึงจิกกินกบ จนหมดบึงในเวลาไม่นาน",
-                "มดงานตัวน้อย ขยันหาอาหาร เก็บไว้ในฤดูร้อน \nแต่ตั๊กแตน เอาแต่ร้องเพลง และเล่นสนุกไปวันๆ \nพอถึงฤดูหนาว อากาศหนาวเย็น ตั๊กแตนไม่มีอาหารกิน \nมันจึงต้อง เดินทางไปขอแบ่งอาหาร จากฝูงมด \nนิทานเรื่องนี้ สอนให้เรารู้จัก เตรียมพร้อมสำหรับอนาคต",
-                "สุนัขจิ้งจอกเจ้าเล่ห์ เห็นกาคาบชิ้นเนื้อ บินมาเกาะกิ่งไม้ \nมันจึงแกล้งพูดชมเชย ว่ากามีเสียงร้อง ที่ไพเราะมาก \nเจ้ากาหลงกล ดีใจที่ถูกชม จึงอ้าปากร้องเพลง \nชิ้นเนื้อแสนอร่อย จึงตกลงมา ให้สุนัขจิ้งจอกกิน \nเราไม่ควร หลงเชื่อคำเยินยอ ของคนแปลกหน้า",
-                "เด็กเลี้ยงแกะคนหนึ่ง ชอบโกหก ชาวบ้านว่ามีหมาป่ามากินแกะ \nชาวบ้านตกใจ วิ่งมาช่วย แต่ก็พบว่า ถูกเด็กหลอก \nวันหนึ่ง หมาป่าตัวใหญ่ วิ่งเข้ามาในฝูงแกะจริงๆ \nเขาตะโกนเสียงดัง ขอให้คนช่วย แต่ไม่มีใครเชื่อเขาอีกเลย \nคนโกหก มักจะไม่มีใครเชื่อถือ แม้จะพูดความจริงก็ตาม",
-                "ชายชาวนาคนหนึ่ง เลี้ยงห่าน ที่ออกไข่เป็นทองคำ วันละหนึ่งฟอง \nเขาเกิดความโลภ อยากได้ไข่ทองคำ ทั้งหมดในคราวเดียว \nจึงตัดสินใจ ใช้มีดผ่าท้องห่าน เพื่อเอาไข่ทองคำ \nแต่เมื่อผ่าออกดู กลับไม่พบไข่ทองคำ เลยแม้แต่ฟองเดียว \nความโลภมาก มักจะทำให้ ลาภที่มีอยู่หายไป",
-                "หมาป่าหิวโซ เห็นลูกแกะตัวน้อย กำลังกินน้ำ อยู่ที่ริมลำธาร \nมันจึงหาเรื่อง กล่าวหาว่า ลูกแกะทำน้ำขุ่น \nลูกแกะพยายาม อธิบายความจริง ว่าตนอยู่ปลายน้ำ \nแต่หมาป่าไม่ยอมฟังเหตุผล และกระโจนเข้าจับลูกแกะ \nคนพาล มักจะหาข้ออ้าง เพื่อรังแกผู้อื่นเสมอ",
-                "การอ่านหนังสือ เป็นประจำ ช่วยเปิดโลกกว้าง ให้กับเรา \nทำให้เรา ได้รับความรู้ใหม่ๆ และฝึกจินตนาการ \nในห้องสมุดของโรงเรียน มีหนังสือนิทาน สนุกๆ มากมาย \nฉันชอบ ชวนเพื่อนๆ ไปยืมหนังสือ มาอ่านด้วยกัน ทุกสัปดาห์ \nหนังสือคือเพื่อนที่ดี ที่ให้ทั้งความรู้ และความเพลิดเพลิน",
-                "วันหยุดสุดสัปดาห์ที่จะถึงนี้ คุณพ่อสัญญาว่า จะพาไปเที่ยว \nเราจะไป ทัศนศึกษา ที่พิพิธภัณฑ์วิทยาศาสตร์ แห่งชาติ \nฉันรู้สึกตื่นเต้น ที่จะได้เห็น โครงกระดูกไดโนเสาร์ ของจริง \nและยังจะได้ดู การทดลองวิทยาศาสตร์ ที่น่าตื่นตาตื่นใจ \nฉันจะเตรียม สมุดจดบันทึก ไปจดความรู้ใหม่ๆ กลับมาด้วย",
-                "ดาวเคราะห์ ในระบบสุริยะของเรา มีทั้งหมด แปดดวง \nโลกที่เราอาศัยอยู่นี้ เป็นดาวเคราะห์ ลำดับที่สาม \nดวงอาทิตย์ เป็นศูนย์กลาง ที่ให้แสงสว่าง และความอบอุ่น \nฉันชอบเรียน วิชาดาราศาสตร์ เรื่องอวกาศ และดวงดาวมากๆ \nความฝันของฉัน คือการได้เป็น นักบินอวกาศ ในอนาคต",
-                "กา หิวน้ำ พบ เหยือกน้ำ ใบหนึ่ง ตั้งอยู่ \nมัน พยายาม กิน น้ำ แต่ ปาก เหยือก แคบ เกินไป \nมัน จึง คาบ หิน ก้อนเล็กๆ ใส่ ลงใน เหยือก \nเมื่อ ใส่ หิน มากขึ้น น้ำ ก็ ล้น ขึ้นมา ให้ กิน \nความพยายาม อยู่ที่ไหน ความสำเร็จ อยู่ที่นั่น",
-                "ชาวนา พบ งูเห่า นอน แข็งตาย อยู่ กลาง ทุ่ง \nเขา สงสาร จึง อุ้ม มัน ขึ้นมา ให้ ความอบอุ่น \nเมื่อ งูเห่า ฟื้น มัน ตกใจ จึง กัด ชาวนา \nก่อน ตาย ชาวนา รำพึง ว่า ไม่ควร สงสาร สัตว์ร้าย \nทำคุณ บูชาโทษ เป็น อย่างนี้ นี่เอง",
-                "สุนัข คาบ ชิ้นเนื้อ ข้าม สะพาน เดิน กลับ บ้าน \nมัน ก้ม มอง เงา ใน น้ำ เห็น สุนัข อีก ตัว \nซึ่ง คาบ ชิ้นเนื้อ ที่ ดู ใหญ่ กว่า ของ ตัวเอง \nมัน จึง เห่า เพื่อ แย่ง เนื้อ ชิ้น นั้น มา \nชิ้นเนื้อ ใน ปาก จึง ตก น้ำ หาย ไป หมดเลย",
-                "ลิง สอง ตัว ทะเลาะ กัน เรื่อง แบ่ง เนยแข็ง \nตาชั่ง ของ แมว เจ้าเล่ห์ จึง เอียง ไปมา \nแมว กัด กิน เนยแข็ง อ้างว่า เพื่อให้ เท่ากัน \nจน ในที่สุด เนยแข็ง ก็ หมด ลง อย่าง รวดเร็ว \nลิง ทั้งสอง จึง ไม่ได้ กิน อะไร เลย แม้แต่น้อย",
-                "ชาวนา เลี้ยง ลา แก่ ไว้ ใช้งาน ใน ฟาร์ม \nวันหนึ่ง ลา ก้าวพลาด ตก ลงไป ใน บ่อ ลึก \nชาวนา ถอดใจ จึง โยน ดิน กลบ บ่อ ทิ้ง \nลา สะบัด ดิน และ เหยียบ ดิน ให้ แน่น \nจน สามารถ ปีน ขึ้น จาก บ่อ ได้ อย่าง ปลอดภัย",
-                "พระอาทิตย์ กับ ลม แข่ง กัน ทดสอบ พลัง \nลม พัด แรง ชาย ก็ ยิ่ง จับ เสื้อคลุม แน่น \nพระอาทิตย์ จึง ส่อง แสง ร้อน อบอ้าว ลงมา \nชาย ทน ไม่ไหว จึง ถอด เสื้อคลุม ออก ในที่สุด \nความอ่อนโยน มักจะ ชนะ ความรุนแรง เสมอ",
-                "หนู เมือง ไป เยี่ยม หนู นา ที่ ชนบท \nหนู นา เลี้ยง อาหาร แบบ ธรรมดา เรียบง่าย \nหนู เมือง ชวน ไป กิน ของ อร่อย ที่ บ้าน \nแต่ ต้อง คอย วิ่ง หนี แมว ตลอด เวลา \nหนู นา จึง ขอกลับ ไป อยู่ นา อย่าง สงบ ดีกว่า",
-                "นกอินทรี บิน จับ เต่า หอย ได้ หนึ่ง ตัว \nมัน บิน ขึ้น สูง บน ท้องฟ้า อย่าง รวดเร็ว \nแล้ว ปล่อย เต่า ตกลง ใส่ โขดหิน ด้านล่าง \nกระดอง เต่า แตก ออก เป็น เสี่ยง ใน พริบตา \nนกอินทรี จึง ได้ กิน เนื้อ เต่า อย่าง เอร็ดอร่อย",
-                "มด เดิน ไป ดื่ม น้ำ ที่ ริม ลำธาร \nมัน ลื่น พลัด ตก ลงไป ใน น้ำ เชี่ยว \nนกพิราบ เห็น จึง โยน ใบไม้ ลงไป ให้ \nมด เกาะ ใบไม้ รอดชีวิต มาได้ อย่าง ปาฏิหาริย์ \nต่อมา มด ก็ กัด เท้า นายพราน ช่วย นก ไว้ ได้",
-                "พ่อค้า ขับ ลา บรรทุก เกลือ ข้าม แม่น้ำ \nลา ลื่น ตก น้ำ เกลือ จึง ละลาย หาย ไป \nลา รู้สึก เบา สบาย เมื่อ ลุก ขึ้น ยืน \nวันต่อมา ลา จึง แกล้ง ลื่น ตก น้ำ อีก \nพ่อค้า รู้ทัน จึง เปลี่ยน เป็น บรรทุก นุ่น แทน"
+                {
+                    text: "กาลครั้งหนึ่ง นานมาแล้ว \nมีเต่า กับกระต่าย วิ่งแข่งกัน ในป่าใหญ่ \nกระต่ายประมาท จึงแอบนอนหลับ ใต้ต้นไม้ \nเต่าพยายาม เดินต่อไป ไม่ยอมหยุดพัก \nในที่สุด เต่าก็เข้าเส้นชัย และเป็นผู้ชนะ",
+                    questions: [
+                        { question: "เหตุใดเต่าจึงเป็นผู้ชนะการแข่งขันวิ่ง?", options: ["เต่าวิ่งเร็วที่สุดในป่า", "มีความพยายามและเดินไม่หยุดพัก", "กระต่ายบาดเจ็บ", "ใช้ทางลัด"], answer: 1 },
+                        { question: "กระต่ายทำสิ่งใดระหว่างการแข่งขัน?", options: ["เก็บแครอทกิน", "แอบนอนหลับใต้ต้นไม้", "หลงทาง", "แวะคุยกับเพื่อน"], answer: 1 },
+                        { question: "ข้อคิดจากเรื่องนี้คืออะไร?", options: ["ความพยายามอยู่ที่ไหน ความสำเร็จอยู่ที่นั่น", "การแข่งขันเป็นสิ่งไม่ดี", "กระต่ายมักจะแพ้เสมอ", "การนอนหลับทำให้สุขภาพดี"], answer: 0 }
+                    ]
+                },
+                {
+                    text: "การออมเงิน เป็นสิ่งที่ดีมาก สำหรับเด็กๆ \nเราควร หยอดกระปุกออมสิน ในทุกๆ วัน \nเมื่อกระปุกเต็ม ก็นำเงิน ไปฝากธนาคาร \nเพื่อเก็บเงินไว้ใช้ ในยามที่เราจำเป็น \nการรู้จักประหยัด จะทำให้เรา ไม่ลำบากในอนาคต",
+                    questions: [
+                        { question: "ประโยชน์ของการออมเงินคืออะไร?", options: ["ทำให้มีเงินเก็บไว้ใช้ในยามจำเป็น", "ทำให้ได้ของเล่นใหม่ทันที", "ทำให้เพื่อนๆ อิจฉา", "ทำให้กระปุกหนักขึ้น"], answer: 0 },
+                        { question: "เราควรหยอดกระปุกออมสินบ่อยแค่ไหน?", options: ["ปีละครั้ง", "เดือนละครั้ง", "สัปดาห์ละครั้ง", "ในทุกๆ วัน"], answer: 3 },
+                        { question: "เมื่อกระปุกออมสินเต็มแล้ว ควรนำเงินไปที่ไหน?", options: ["ไปซื้อขนม", "นำไปฝากธนาคาร", "ซ่อนไว้ใต้เตียง", "แบ่งให้เพื่อนทั้งหมด"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ลูกหมูสามตัว ตัดสินใจ สร้างบ้าน คนละหลัง \nตัวแรกใช้ฟาง ตัวที่สอง ใช้ไม้สร้างบ้าน \nส่วนตัวที่สาม ขยันกว่าใคร จึงใช้อิฐสร้างบ้าน \nเมื่อหมาป่ามาเป่า บ้านอิฐจึงแข็งแรง ไม่พังทลาย \nหมาป่าหมดแรง และต้องยอมแพ้ เดินหนีไปในที่สุด",
+                    questions: [
+                        { question: "ลูกหมูตัวแรกสร้างบ้านด้วยวัสดุใด?", options: ["ไม้", "ฟาง", "อิฐ", "ปูน"], answer: 1 },
+                        { question: "บ้านของหมูตัวใดที่แข็งแรงจนหมาป่าเป่าไม่พัง?", options: ["ตัวที่หนึ่ง", "ตัวที่สอง", "ตัวที่สาม", "พังทุกหลัง"], answer: 2 },
+                        { question: "ลูกหมูตัวที่สามมีนิสัยอย่างไรจึงใช้อิฐสร้างบ้าน?", options: ["ขี้เกียจ", "ฉลาดและขยันกว่าใคร", "เห็นแก่ตัว", "ชอบเลียนแบบ"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ผักและผลไม้ มีวิตามินมากมาย หลายชนิด \nช่วยให้ร่างกายแข็งแรง และขับถ่ายได้สะดวก \nเด็กๆ ทุกคน ควรรับประทานผัก ในทุกๆ มื้อ \nเพื่อให้ร่างกาย เจริญเติบโต และมีภูมิคุ้มกัน \nถ้าเรากินอาหาร ที่มีประโยชน์ เราก็จะไม่ป่วยง่าย",
+                    questions: [
+                        { question: "ผักและผลไม้มีประโยชน์เด่นๆ อย่างไร?", options: ["ทำให้ฟันขาว", "มีวิตามินช่วยให้แข็งแรงและขับถ่ายสะดวก", "ทำให้นอนหลับง่าย", "ช่วยให้วิ่งเร็ว"], answer: 1 },
+                        { question: "เด็กๆ ควรรับประทานผักบ่อยแค่ไหน?", options: ["วันละครั้ง", "เฉพาะตอนป่วย", "ในทุกๆ มื้อ", "ไม่จำเป็นต้องทาน"], answer: 2 },
+                        { question: "การมีภูมิคุ้มกันที่ดีส่งผลอย่างไร?", options: ["ทำให้ไม่ป่วยง่าย", "ทำให้ตัวสูงที่สุดในห้อง", "ทำให้สายตาดี", "ทำให้ฉลาดขึ้นทันที"], answer: 0 }
+                    ]
+                },
+                {
+                    text: "การดื่มนม ในตอนเช้า ช่วยให้สมองแจ่มใส \nทำให้กระดูก และฟันของเรา แข็งแรงมากยิ่งขึ้น \nนมวัวมีโปรตีน และแคลเซียมสูง มากมาย \nเป็นอาหาร ที่เหมาะสม สำหรับเด็กทุกคน \nอย่าลืม ดื่มนมอย่างน้อย วันละสองแก้ว นะครับ",
+                    questions: [
+                        { question: "การดื่มนมตอนเช้าช่วยเรื่องอะไร?", options: ["ช่วยให้สมองแจ่มใส", "ทำให้หิวข้าว", "ทำให้อิ่มจนจุก", "ช่วยให้ผมยาวเร็ว"], answer: 0 },
+                        { question: "สารอาหารใดในนมวัวที่ทำให้กระดูกและฟันแข็งแรง?", options: ["วิตามินซี", "ไขมัน", "คาร์โบไฮเดรต", "โปรตีนและแคลเซียม"], answer: 3 },
+                        { question: "เด็กๆ ควรดื่มนมอย่างน้อยวันละกี่แก้ว?", options: ["หนึ่งแก้ว", "สองแก้ว", "สามแก้ว", "ครึ่งแก้ว"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ครอบครัวของฉัน มีคุณพ่อ คุณแม่ พี่ชาย และตัวฉัน \nในวันหยุดสุดสัปดาห์ เรามักจะ ไปเที่ยวสวนสัตว์ \nฉันชอบดู ยีราฟคอยาว และช้างตัวใหญ่ กินกล้วย \nพวกเราเดินเล่น ถ่ายรูป และกินไอศกรีม ด้วยกัน \nครอบครัวของเรา มีความสุข และรักกันมาก",
+                    questions: [
+                        { question: "ครอบครัวนี้มีสมาชิกทั้งหมดกี่คน?", options: ["3 คน", "4 คน", "5 คน", "6 คน"], answer: 1 },
+                        { question: "ครอบครัวนี้มักจะไปเที่ยวที่ไหนในวันหยุด?", options: ["สวนสนุก", "สวนสัตว์", "พิพิธภัณฑ์", "ห้างสรรพสินค้า"], answer: 1 },
+                        { question: "สัตว์ตัวใดที่ผู้เขียนชอบดูมันกินกล้วย?", options: ["ยีราฟ", "ลิง", "ช้าง", "ฮิปโป"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "การออกกำลังกาย ทำให้ร่างกาย ของเราแข็งแรง \nเราควรวิ่งเล่น กระโดดเชือก หรือเต้นแอโรบิก \nอย่างน้อยวันละ สามสิบนาที เพื่อสุขภาพที่ดี \nเพื่อให้เหงื่อออก ร่างกายสดชื่น และกระปรี้กระเปร่า \nเด็กๆ ที่ชอบออกกำลังกาย จะอารมณ์ดี ตลอดวัน",
+                    questions: [
+                        { question: "การออกกำลังกายส่งผลดีอย่างไร?", options: ["ทำให้เบื่ออาหาร", "ทำให้ร่างกายแข็งแรงและสดชื่น", "ทำให้นอนไม่หลับ", "ทำให้ปวดเมื่อยตลอดไป"], answer: 1 },
+                        { question: "เราควรออกกำลังกายอย่างน้อยวันละกี่นาที?", options: ["10 นาที", "20 นาที", "30 นาที", "60 นาที"], answer: 2 },
+                        { question: "ผลพลอยได้ของเด็กที่ชอบออกกำลังกายคืออะไร?", options: ["จะเรียนเก่งที่สุด", "จะอารมณ์ดีตลอดวัน", "จะไม่ต้องไปโรงเรียน", "จะได้ขนมเป็นรางวัล"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ก่อนนอนทุกคืน เราต้องแปรงฟัน ให้สะอาด \nเพื่อป้องกันฟันผุ และแมงกินฟัน ในช่องปาก \nบีบยาสีฟัน ลงบนแปรง เท่าเมล็ดถั่วเขียว \nแล้วแปรงขึ้นลง ให้สะอาด ทั่วทุกซอกทุกมุม \nตื่นเช้ามา ลมหายใจของเรา จะได้หอมสดชื่น",
+                    questions: [
+                        { question: "จุดประสงค์หลักของการแปรงฟันก่อนนอนคืออะไร?", options: ["เพื่อป้องกันฟันผุและแมงกินฟัน", "เพื่อรักษาอาการปวดหัว", "เพื่อให้ฟันขาววิ้ง", "เพื่อให้มีน้ำลายมาก"], answer: 0 },
+                        { question: "ควรบีบยาสีฟันปริมาณเท่าใด?", options: ["เต็มแปรง", "ครึ่งแปรง", "เท่าเมล็ดถั่วเขียว", "เท่าเหรียญสิบบาท"], answer: 2 },
+                        { question: "วิธีการแปรงฟันที่ถูกต้องตามเนื้อเรื่องคือวิธีใด?", options: ["แปรงแรงๆ เฉพาะฟันหน้า", "แปรงขึ้นลงให้สะอาดทั่วซอกมุม", "แปรงซ้ายขวาอย่างรวดเร็ว", "แค่อมยาสีฟันแล้วบ้วนทิ้ง"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ฉันมีสุนัขแสนรู้ ตัวหนึ่ง ชื่อว่าเจ้าด่าง \nมันชอบวิ่งเก็บ ลูกบอลสีแดง ที่ฉันโยนไปไกลๆ \nเวลาที่ฉัน กลับมาจากโรงเรียน ในตอนเย็น \nมันจะกระดิกหาง และวิ่งมารอรับ ที่หน้าบ้านเสมอ \nเจ้าด่าง เป็นเพื่อนเล่น ที่ซื่อสัตย์ ของฉัน",
+                    questions: [
+                        { question: "สุนัขในเรื่องมีชื่อว่าอะไร?", options: ["เจ้าตูบ", "เจ้าด่าง", "เจ้าดำ", "เจ้าจุด"], answer: 1 },
+                        { question: "สุนัขชอบเล่นของเล่นอะไร?", options: ["ตุ๊กตาหมี", "จานร่อน", "ลูกบอลสีแดง", "กระดูกยาง"], answer: 2 },
+                        { question: "เมื่อเจ้าของกลับจากโรงเรียน สุนัขแสดงอาการอย่างไร?", options: ["นอนหลับไม่สนใจ", "กระดิกหางและวิ่งมารอรับ", "เห่าเสียงดังด้วยความโกรธ", "วิ่งหนีไปซ่อนตัว"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ประเทศไทยของเรา แบ่งออกเป็น สามฤดูหลักๆ \nคือฤดูร้อน ฤดูฝน และฤดูหนาว ที่แสนเย็นสบาย \nในฤดูฝน ต้นไม้ใบหญ้า จะเขียวชอุ่ม สวยงาม \nส่วนฤดูหนาว ผู้คนจะสวมเสื้อกันหนาว สีสันสดใส \nฉันรักประเทศไทย เพราะมีธรรมชาติ ที่อุดมสมบูรณ์",
+                    questions: [
+                        { question: "ประเทศไทยมีฤดูหลักทั้งหมดกี่ฤดู?", options: ["2 ฤดู", "3 ฤดู", "4 ฤดู", "5 ฤดู"], answer: 1 },
+                        { question: "ต้นไม้ใบหญ้าจะเขียวชอุ่มในฤดูใด?", options: ["ฤดูร้อน", "ฤดูหนาว", "ฤดูฝน", "ฤดูใบไม้ร่วง"], answer: 2 },
+                        { question: "เหตุใดผู้เขียนจึงรักประเทศไทย?", options: ["เพราะมีอากาศหนาวตลอดปี", "เพราะมีธรรมชาติที่อุดมสมบูรณ์", "เพราะมีหิมะตก", "เพราะไม่มีฝนเลย"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ราชสีห์ตัวใหญ่ กำลังนอนหลับ อยู่ใต้ต้นไม้ \nมีหนูตัวหนึ่ง วิ่งซุกซน ข้ามตัวของราชสีห์ \nราชสีห์ตื่นขึ้นมา ด้วยความโกรธ และจับหนูไว้ \nหนูร้องขอชีวิต และสัญญาว่า จะกลับมาตอบแทนคุณ \nต่อมา หนูก็ได้ช่วยกัดบ่วงแร้ว ช่วยชีวิตราชสีห์ไว้ได้จริงๆ",
+                    questions: [
+                        { question: "ใครเป็นผู้รบกวนการนอนหลับของราชสีห์?", options: ["นายพราน", "หนูตัวเล็ก", "กระต่ายป่า", "นกฮูก"], answer: 1 },
+                        { question: "หนูให้สัญญาอะไรเพื่อแลกกับการรอดชีวิต?", options: ["จะหาอาหารมาให้", "จะมอบสมบัติให้", "จะกลับมาตอบแทนคุณ", "จะเป็นคนรับใช้ตลอดไป"], answer: 2 },
+                        { question: "หนูตอบแทนคุณราชสีห์ด้วยวิธีใด?", options: ["ช่วยต่อสู้กับนายพราน", "กัดบ่วงแร้วที่รัดราชสีห์จนขาด", "พาราชสีห์ไปซ่อนตัว", "รักษาแผลให้ราชสีห์"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "กบฝูงหนึ่ง อาศัยอยู่ในบึง และอยากได้เจ้านาย \nเทวดาจึง ทิ้งขอนไม้ท่อนใหญ่ ลงมาให้พวกมัน \nกบไม่พอใจ และเรียกร้อง อยากได้เจ้านายที่เก่งกว่านี้ \nเทวดาโมโห จึงส่งนกกระสา ลงมาที่บึงแห่งนั้น \nนกกระสา จึงจิกกินกบ จนหมดบึงในเวลาไม่นาน",
+                    questions: [
+                        { question: "กบฝูงนี้ร้องขอสิ่งใดจากเทวดา?", options: ["อาหารอร่อยๆ", "เจ้านาย", "บึงที่กว้างกว่าเดิม", "ปีกสำหรับบิน"], answer: 1 },
+                        { question: "เจ้านายสิ่งแรกที่เทวดาส่งลงมาให้คืออะไร?", options: ["งูเห่า", "ก้อนหิน", "ขอนไม้", "นกกระสา"], answer: 2 },
+                        { question: "จุดจบของฝูงกบเป็นอย่างไร?", options: ["ได้เจ้านายที่เก่งและใจดี", "ถูกนกกระสาจิกกินจนหมด", "ย้ายไปอยู่บึงอื่นอย่างสงบ", "เทวดาลงมาปกครองเอง"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "มดงานตัวน้อย ขยันหาอาหาร เก็บไว้ในฤดูร้อน \nแต่ตั๊กแตน เอาแต่ร้องเพลง และเล่นสนุกไปวันๆ \nพอถึงฤดูหนาว อากาศหนาวเย็น ตั๊กแตนไม่มีอาหารกิน \nมันจึงต้อง เดินทางไปขอแบ่งอาหาร จากฝูงมด \nนิทานเรื่องนี้ สอนให้เรารู้จัก เตรียมพร้อมสำหรับอนาคต",
+                    questions: [
+                        { question: "มดงานทำอะไรในช่วงฤดูร้อน?", options: ["พักผ่อนใต้ต้นไม้", "ขยันหาอาหารเก็บไว้", "ร้องเพลงกับตั๊กแตน", "สร้างบ้านใหม่"], answer: 1 },
+                        { question: "เพราะเหตุใดตั๊กแตนจึงไม่มีอาหารกินในฤดูหนาว?", options: ["อาหารโดนขโมยไป", "เอาแต่เล่นสนุกและไม่ยอมหาอาหารเก็บไว้", "มดแย่งอาหารไปหมด", "อาหารเน่าเสีย"], answer: 1 },
+                        { question: "ตั๊กแตนแก้ปัญหาความหิวอย่างไร?", options: ["อดทนจนถึงฤดูร้อน", "ย้ายไปเมืองอื่น", "ไปขอแบ่งอาหารจากฝูงมด", "กินหญ้าแห้งแทน"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "สุนัขจิ้งจอกเจ้าเล่ห์ เห็นกาคาบชิ้นเนื้อ บินมาเกาะกิ่งไม้ \nมันจึงแกล้งพูดชมเชย ว่ากามีเสียงร้อง ที่ไพเราะมาก \nเจ้ากาหลงกล ดีใจที่ถูกชม จึงอ้าปากร้องเพลง \nชิ้นเนื้อแสนอร่อย จึงตกลงมา ให้สุนัขจิ้งจอกกิน \nเราไม่ควร หลงเชื่อคำเยินยอ ของคนแปลกหน้า",
+                    questions: [
+                        { question: "สุนัขจิ้งจอกต้องการสิ่งใดจากอีกา?", options: ["ขนนก", "ชิ้นเนื้อ", "อยากเป็นเพื่อน", "รังนก"], answer: 1 },
+                        { question: "จิ้งจอกใช้อุบายใดเพื่อให้ได้สิ่งที่ต้องการ?", options: ["ข่มขู่ด้วยเสียงคำราม", "แกล้งพูดชมว่ากามีเสียงไพเราะ", "ขอแบ่งกันกินดีๆ", "ปีนต้นไม้ขึ้นไปแย่ง"], answer: 1 },
+                        { question: "ข้อคิดจากเรื่องนี้คืออะไร?", options: ["ไม่ควรหลงเชื่อคำเยินยอ", "ควรแบ่งปันอาหารให้ผู้อื่น", "การร้องเพลงเป็นสิ่งดี", "สัตว์ป่าควรเป็นเพื่อนกัน"], answer: 0 }
+                    ]
+                },
+                {
+                    text: "เด็กเลี้ยงแกะคนหนึ่ง ชอบโกหก ชาวบ้านว่ามีหมาป่ามากินแกะ \nชาวบ้านตกใจ วิ่งมาช่วย แต่ก็พบว่า ถูกเด็กหลอก \nวันหนึ่ง หมาป่าตัวใหญ่ วิ่งเข้ามาในฝูงแกะจริงๆ \nเขาตะโกนเสียงดัง ขอให้คนช่วย แต่ไม่มีใครเชื่อเขาอีกเลย \nคนโกหก มักจะไม่มีใครเชื่อถือ แม้จะพูดความจริงก็ตาม",
+                    questions: [
+                        { question: "เด็กเลี้ยงแกะมีนิสัยไม่ดีอย่างไร?", options: ["ขี้เกียจต้อนแกะ", "ชอบโกหกชาวบ้านว่าหมาป่ามา", "ชอบขโมยแกะไปขาย", "ชอบหลับตอนทำงาน"], answer: 1 },
+                        { question: "เมื่อหมาป่ามาจริงๆ เกิดอะไรขึ้น?", options: ["ชาวบ้านมาช่วยทัน", "หมาป่าวิ่งหนีไปเอง", "ไม่มีใครมาช่วยเพราะไม่เชื่อ", "เด็กต่อสู้กับหมาป่าชนะ"], answer: 2 },
+                        { question: "นิทานเรื่องนี้สอนให้รู้ว่าอะไร?", options: ["เด็กควรเลี้ยงแกะด้วยความระวัง", "คนโกหกมักไม่มีใครเชื่อถือ", "หมาป่าเป็นสัตว์ดุร้าย", "ชาวบ้านใจร้ายที่ไม่มาช่วย"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ชายชาวนาคนหนึ่ง เลี้ยงห่าน ที่ออกไข่เป็นทองคำ วันละหนึ่งฟอง \nเขาเกิดความโลภ อยากได้ไข่ทองคำ ทั้งหมดในคราวเดียว \nจึงตัดสินใจ ใช้มีดผ่าท้องห่าน เพื่อเอาไข่ทองคำ \nแต่เมื่อผ่าออกดู กลับไม่พบไข่ทองคำ เลยแม้แต่ฟองเดียว \nความโลภมาก มักจะทำให้ ลาภที่มีอยู่หายไป",
+                    questions: [
+                        { question: "ห่านตัวนี้มีความพิเศษอย่างไร?", options: ["พูดภาษามนุษย์ได้", "ออกไข่เป็นทองคำวันละฟอง", "ขนเป็นสีทอง", "วิ่งเร็วที่สุดในฟาร์ม"], answer: 1 },
+                        { question: "ชาวนาตัดสินใจผ่าท้องห่านเพราะอะไร?", options: ["ห่านป่วยหนัก", "ต้องการกินเนื้อห่าน", "ความโลภอยากได้ไข่ทองคำทั้งหมดคราวเดียว", "ห่านไม่ออกไข่อีกแล้ว"], answer: 2 },
+                        { question: "ผลสุดท้ายชาวนาได้อะไรจากการผ่าท้องห่าน?", options: ["ได้ไข่ทองคำเต็มท้อง", "ไม่พบไข่ทองคำเลยและสูญเสียห่านไป", "พบเพชรพลอยแทน", "ห่านรอดชีวิตและหนีไป"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "หมาป่าหิวโซ เห็นลูกแกะตัวน้อย กำลังกินน้ำ อยู่ที่ริมลำธาร \nมันจึงหาเรื่อง กล่าวหาว่า ลูกแกะทำน้ำขุ่น \nลูกแกะพยายาม อธิบายความจริง ว่าตนอยู่ปลายน้ำ \nแต่หมาป่าไม่ยอมฟังเหตุผล และกระโจนเข้าจับลูกแกะ \nคนพาล มักจะหาข้ออ้าง เพื่อรังแกผู้อื่นเสมอ",
+                    questions: [
+                        { question: "หมาป่ากล่าวหาลูกแกะในเรื่องใด?", options: ["ส่งเสียงดัง", "กินหญ้าของมัน", "ทำน้ำในลำธารขุ่น", "ขโมยอาหาร"], answer: 2 },
+                        { question: "ลูกแกะอธิบายความจริงว่าอย่างไร?", options: ["ตนอยู่ปลายน้ำ น้ำจึงไม่ไหลไปหาหมาป่า", "ตนไม่ได้กินน้ำ", "น้ำขุ่นอยู่ก่อนแล้ว", "มีสัตว์อื่นทำน้ำขุ่น"], answer: 0 },
+                        { question: "จุดประสงค์ที่แท้จริงของหมาป่าคืออะไร?", options: ["ต้องการดื่มน้ำใสๆ", "ต้องการหาข้ออ้างเพื่อจับลูกแกะกิน", "ต้องการไล่ลูกแกะไปที่อื่น", "ต้องการตักเตือนลูกแกะเฉยๆ"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "การอ่านหนังสือ เป็นประจำ ช่วยเปิดโลกกว้าง ให้กับเรา \nทำให้เรา ได้รับความรู้ใหม่ๆ และฝึกจินตนาการ \nในห้องสมุดของโรงเรียน มีหนังสือนิทาน สนุกๆ มากมาย \nฉันชอบ ชวนเพื่อนๆ ไปยืมหนังสือ มาอ่านด้วยกัน ทุกสัปดาห์ \nหนังสือคือเพื่อนที่ดี ที่ให้ทั้งความรู้ และความเพลิดเพลิน",
+                    questions: [
+                        { question: "การอ่านหนังสือเป็นประจำมีประโยชน์หลักอย่างไร?", options: ["เปิดโลกกว้างและได้รับความรู้ใหม่ๆ", "ทำให้สายตาสั้น", "ทำให้มีเพื่อนน้อยลง", "ทำให้เรียนเก่งโดยไม่ต้องสอบ"], answer: 0 },
+                        { question: "ผู้เขียนมักไปยืมหนังสือที่ไหน?", options: ["ร้านหนังสือ", "ห้องสมุดของโรงเรียน", "บ้านเพื่อน", "รถห้องสมุดเคลื่อนที่"], answer: 1 },
+                        { question: "ผู้เขียนเปรียบหนังสือเหมือนกับสิ่งใด?", options: ["คุณครู", "เพื่อนที่ดี", "ของเล่น", "โลกเวทมนตร์"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "วันหยุดสุดสัปดาห์ที่จะถึงนี้ คุณพ่อสัญญาว่า จะพาไปเที่ยว \nเราจะไป ทัศนศึกษา ที่พิพิธภัณฑ์วิทยาศาสตร์ แห่งชาติ \nฉันรู้สึกตื่นเต้น ที่จะได้เห็น โครงกระดูกไดโนเสาร์ ของจริง \nและยังจะได้ดู การทดลองวิทยาศาสตร์ ที่น่าตื่นตาตื่นใจ \nฉันจะเตรียม สมุดจดบันทึก ไปจดความรู้ใหม่ๆ กลับมาด้วย",
+                    questions: [
+                        { question: "ครอบครัวนี้มีแผนจะไปเที่ยวที่ไหน?", options: ["สวนสัตว์", "พิพิธภัณฑ์วิทยาศาสตร์แห่งชาติ", "สวนสนุก", "ทะเล"], answer: 1 },
+                        { question: "สิ่งที่ผู้เขียนตื่นเต้นอยากเห็นมากที่สุดคืออะไร?", options: ["การแสดงมายากล", "โครงกระดูกไดโนเสาร์", "ท้องฟ้าจำลอง", "หุ่นยนต์"], answer: 1 },
+                        { question: "ผู้เขียนตั้งใจจะนำสิ่งใดติดตัวไปด้วย?", options: ["ขนมขบเคี้ยว", "กล้องถ่ายรูป", "สมุดจดบันทึกความรู้", "ของเล่น"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "ดาวเคราะห์ ในระบบสุริยะของเรา มีทั้งหมด แปดดวง \nโลกที่เราอาศัยอยู่นี้ เป็นดาวเคราะห์ ลำดับที่สาม \nดวงอาทิตย์ เป็นศูนย์กลาง ที่ให้แสงสว่าง และความอบอุ่น \nฉันชอบเรียน วิชาดาราศาสตร์ เรื่องอวกาศ และดวงดาวมากๆ \nความฝันของฉัน คือการได้เป็น นักบินอวกาศ ในอนาคต",
+                    questions: [
+                        { question: "ระบบสุริยะของเรามีดาวเคราะห์กี่ดวง?", options: ["7 ดวง", "8 ดวง", "9 ดวง", "10 ดวง"], answer: 1 },
+                        { question: "โลกอยู่ในลำดับที่เท่าใดนับจากดวงอาทิตย์?", options: ["ลำดับที่ 1", "ลำดับที่ 2", "ลำดับที่ 3", "ลำดับที่ 4"], answer: 2 },
+                        { question: "ความฝันในอนาคตของผู้เขียนคืออะไร?", options: ["นักวิทยาศาสตร์", "ครูสอนดาราศาสตร์", "นักบินอวกาศ", "นักสำรวจ"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "กา หิวน้ำ พบ เหยือกน้ำ ใบหนึ่ง ตั้งอยู่ \nมัน พยายาม กิน น้ำ แต่ ปาก เหยือก แคบ เกินไป \nมัน จึง คาบ หิน ก้อนเล็กๆ ใส่ ลงใน เหยือก \nเมื่อ ใส่ หิน มากขึ้น น้ำ ก็ ล้น ขึ้นมา ให้ กิน \nความพยายาม อยู่ที่ไหน ความสำเร็จ อยู่ที่นั่น",
+                    questions: [
+                        { question: "ทำไมกาจึงไม่สามารถกินน้ำจากเหยือกได้ในตอนแรก?", options: ["น้ำร้อนเกินไป", "ปากเหยือกแคบเกินไป", "เหยือกว่างเปล่า", "มีสัตว์อื่นเฝ้าอยู่"], answer: 1 },
+                        { question: "กาใช้วิธีใดในการแก้ปัญหา?", options: ["ใช้กิ่งไม้ดูดน้ำ", "คาบหินใส่ลงไปจนน้ำล้นขึ้นมา", "ผลักเหยือกให้ล้ม", "เจาะรูที่ก้นเหยือก"], answer: 1 },
+                        { question: "ความสำเร็จของกาเกิดจากสิ่งใด?", options: ["ความมีโชคดี", "ความพยายามและปัญญา", "ความช่วยเหลือจากเพื่อน", "ความแข็งแรง"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ชาวนา พบ งูเห่า นอน แข็งตาย อยู่ กลาง ทุ่ง \nเขา สงสาร จึง อุ้ม มัน ขึ้นมา ให้ ความอบอุ่น \nเมื่อ งูเห่า ฟื้น มัน ตกใจ จึง กัด ชาวนา \nก่อน ตาย ชาวนา รำพึง ว่า ไม่ควร สงสาร สัตว์ร้าย \nทำคุณ บูชาโทษ เป็น อย่างนี้ นี่เอง",
+                    questions: [
+                        { question: "ชาวนาพบงูเห่าในสภาพใด?", options: ["กำลังกินเหยื่อ", "นอนแข็งใกล้ตายด้วยความหนาว", "บาดเจ็บจากการต่อสู้", "กำลังลอกคราบ"], answer: 1 },
+                        { question: "ทำไมงูเห่าจึงกัดชาวนา?", options: ["เพราะชาวนาทำร้ายมัน", "เพราะมันตกใจเมื่อฟื้นขึ้นมา", "เพราะมันหิว", "เพราะป้องกันไข่ของมัน"], answer: 1 },
+                        { question: "สำนวนใดที่ตรงกับเนื้อเรื่องนี้มากที่สุด?", options: ["ทำดีได้ดี", "ทำคุณบูชาโทษ", "จับปลาสองมือ", "เข็นครกขึ้นภูเขา"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "สุนัข คาบ ชิ้นเนื้อ ข้าม สะพาน เดิน กลับ บ้าน \nมัน ก้ม มอง เงา ใน น้ำ เห็น สุนัข อีก ตัว \nซึ่ง คาบ ชิ้นเนื้อ ที่ ดู ใหญ่ กว่า ของ ตัวเอง \nมัน จึง เห่า เพื่อ แย่ง เนื้อ ชิ้น นั้น มา \nชิ้นเนื้อ ใน ปาก จึง ตก น้ำ หาย ไป หมดเลย",
+                    questions: [
+                        { question: "สุนัขเห็นอะไรเมื่อมองลงไปในน้ำ?", options: ["ปลาตัวใหญ่", "เงาของตัวเองที่คาบชิ้นเนื้อ", "สุนัขศัตรู", "ชิ้นเนื้อลอยน้ำมา"], answer: 1 },
+                        { question: "ทำไมสุนัขจึงอ้าปากเห่า?", options: ["ทักทายเพื่อน", "ตกใจกลัว", "ต้องการแย่งชิ้นเนื้อที่คิดว่าใหญ่กว่าในน้ำ", "เรียกให้คนมาช่วย"], answer: 2 },
+                        { question: "ผลสุดท้ายของความโลภของสุนัขคืออะไร?", options: ["ได้ชิ้นเนื้อสองชิ้น", "ชิ้นเนื้อตกน้ำหายไป ไม่ได้กินอะไรเลย", "ได้เพื่อนใหม่", "ชิ้นเนื้อเล็กลง"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "ลิง สอง ตัว ทะเลาะ กัน เรื่อง แบ่ง เนยแข็ง \nตาชั่ง ของ แมว เจ้าเล่ห์ จึง เอียง ไปมา \nแมว กัด กิน เนยแข็ง อ้างว่า เพื่อให้ เท่ากัน \nจน ในที่สุด เนยแข็ง ก็ หมด ลง อย่าง รวดเร็ว \nลิง ทั้งสอง จึง ไม่ได้ กิน อะไร เลย แม้แต่น้อย",
+                    questions: [
+                        { question: "ลิงสองตัวมีปัญหาทะเลาะกันเรื่องอะไร?", options: ["แย่งอาณาเขต", "เรื่องการแบ่งเนยแข็ง", "หาว่าใครฉลาดกว่า", "เรื่องการปีนต้นไม้"], answer: 1 },
+                        { question: "แมวเจ้าเล่ห์ใช้วิธีใดในการหลอกกินเนยแข็ง?", options: ["กัดกินทีละข้างอ้างว่าเพื่อปรับตาชั่งให้เท่ากัน", "ขโมยวิ่งหนีไปเลย", "ขอแลกกับปลา", "ขู่ลิงให้กลัว"], answer: 0 },
+                        { question: "ใครเป็นผู้ที่ได้ผลประโยชน์ไปเต็มๆ ในเรื่องนี้?", options: ["ลิงตัวแรก", "ลิงตัวที่สอง", "แมวเจ้าเล่ห์", "ไม่มีใครได้เลย"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "ชาวนา เลี้ยง ลา แก่ ไว้ ใช้งาน ใน ฟาร์ม \nวันหนึ่ง ลา ก้าวพลาด ตก ลงไป ใน บ่อ ลึก \nชาวนา ถอดใจ จึง โยน ดิน กลบ บ่อ ทิ้ง \nลา สะบัด ดิน และ เหยียบ ดิน ให้ แน่น \nจน สามารถ ปีน ขึ้น จาก บ่อ ได้ อย่าง ปลอดภัย",
+                    questions: [
+                        { question: "เกิดอุบัติเหตุอะไรขึ้นกับลาแก่?", options: ["ถูกหมาป่าทำร้าย", "ก้าวพลาดตกลงไปในบ่อลึก", "โดนงูกัด", "หลงทางในป่า"], answer: 1 },
+                        { question: "ชาวนาแก้ปัญหาในตอนแรกอย่างไร?", options: ["โยนเชือกลงไปช่วย", "ถอดใจและโยนดินกลบหวังจะฝัง", "ตะโกนเรียกให้คนมาช่วย", "ปีนลงไปอุ้มขึ้นมา"], answer: 1 },
+                        { question: "ลาสามารถรอดชีวิตขึ้นมาได้อย่างไร?", options: ["สะบัดดินที่โยนลงมาแล้วเหยียบขึ้นมาเรื่อยๆ", "กระโดดครั้งเดียวพ้นบ่อ", "ร้องจนชาวนาใจอ่อน", "ขุดอุโมงค์หนี"], answer: 0 }
+                    ]
+                },
+                {
+                    text: "พระอาทิตย์ กับ ลม แข่ง กัน ทดสอบ พลัง \nลม พัด แรง ชาย ก็ ยิ่ง จับ เสื้อคลุม แน่น \nพระอาทิตย์ จึง ส่อง แสง ร้อน อบอ้าว ลงมา \nชาย ทน ไม่ไหว จึง ถอด เสื้อคลุม ออก ในที่สุด \nความอ่อนโยน มักจะ ชนะ ความรุนแรง เสมอ",
+                    questions: [
+                        { question: "พระอาทิตย์และลมแข่งขันกันในเรื่องใด?", options: ["ใครทำให้ฝนตกได้", "ใครมีพลังทำให้ชายหนุ่มถอดเสื้อคลุมได้", "ใครวิ่งรอบโลกเร็วกว่า", "ใครสร้างพายุได้ใหญ่กว่า"], answer: 1 },
+                        { question: "เมื่อลมพัดอย่างรุนแรง ชายหนุ่มมีปฏิกิริยาอย่างไร?", options: ["รีบถอดเสื้อคลุมทิ้ง", "จับเสื้อคลุมไว้แน่นยิ่งขึ้น", "วิ่งหนีหาที่หลบซ่อน", "ตะโกนด่าทอลม"], answer: 1 },
+                        { question: "นิทานเรื่องนี้สอนให้รู้ว่าอะไร?", options: ["ความรุนแรงแก้ปัญหาได้ทุกสิ่ง", "ความอ่อนโยนเอาชนะความรุนแรงได้", "มนุษย์กลัวความร้อนมากกว่าลม", "พระอาทิตย์มีอำนาจที่สุดในโลก"], answer: 1 }
+                    ]
+                },
+                {
+                    text: "หนู เมือง ไป เยี่ยม หนู นา ที่ ชนบท \nหนู นา เลี้ยง อาหาร แบบ ธรรมดา เรียบง่าย \nหนู เมือง ชวน ไป กิน ของ อร่อย ที่ บ้าน \nแต่ ต้อง คอย วิ่ง หนี แมว ตลอด เวลา \nหนู นา จึง ขอกลับ ไป อยู่ นา อย่าง สงบ ดีกว่า",
+                    questions: [
+                        { question: "อาหารที่หนูนาเลี้ยงหนูเมืองมีลักษณะอย่างไร?", options: ["อาหารหรูหรา", "อาหารแบบธรรมดาเรียบง่าย", "มีแต่เนื้อสัตว์", "เป็นของเหลือทิ้ง"], answer: 1 },
+                        { question: "ทำไมการกินอาหารที่บ้านของหนูเมืองจึงไม่มีความสุข?", options: ["อาหารรสชาติไม่อร่อย", "ต้องคอยวิ่งหนีแมวตลอดเวลาขาดความปลอดภัย", "หนูเมืองหวงอาหาร", "อากาศร้อนเกินไป"], answer: 1 },
+                        { question: "ท้ายที่สุดหนูนาตัดสินใจอย่างไร?", options: ["ย้ายมาอยู่เมืองถาวร", "ต่อสู้กับแมว", "ขอกลับไปอยู่ชนบทอย่างสงบ", "ชวนหนูเมืองไปอยู่ป่าลึก"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "นกอินทรี บิน จับ เต่า หอย ได้ หนึ่ง ตัว \nมัน บิน ขึ้น สูง บน ท้องฟ้า อย่าง รวดเร็ว \nแล้ว ปล่อย เต่า ตกลง ใส่ โขดหิน ด้านล่าง \nกระดอง เต่า แตก ออก เป็น เสี่ยง ใน พริบตา \nนกอินทรี จึง ได้ กิน เนื้อ เต่า อย่าง เอร็ดอร่อย",
+                    questions: [
+                        { question: "นกอินทรีจับสัตว์ชนิดใดมาได้?", options: ["งู", "กระต่าย", "เต่าหอย", "ปลา"], answer: 2 },
+                        { question: "นกอินทรีปล่อยเต่าตกลงใส่โขดหินเพื่อจุดประสงค์ใด?", options: ["เพื่อทดสอบความแข็ง", "เพื่อให้กระดองแตกออกจะได้กินเนื้อ", "เพราะน้ำหนักเยอะเกินไป", "เพื่อสอนให้เต่าบิน"], answer: 1 },
+                        { question: "ผลลัพธ์ของเต่าเป็นอย่างไร?", options: ["กระดองแตกและตกเป็นอาหารของนกอินทรี", "รอดชีวิตเพราะกระดองแข็ง", "คลานหนีรอดไปได้", "ตกลงไปในน้ำปลอดภัย"], answer: 0 }
+                    ]
+                },
+                {
+                    text: "มด เดิน ไป ดื่ม น้ำ ที่ ริม ลำธาร \nมัน ลื่น พลัด ตก ลงไป ใน น้ำ เชี่ยว \nนกพิราบ เห็น จึง โยน ใบไม้ ลงไป ให้ \nมด เกาะ ใบไม้ รอดชีวิต มาได้ อย่าง ปาฏิหาริย์ \nต่อมา มด ก็ กัด เท้า นายพราน ช่วย นก ไว้ ได้",
+                    questions: [
+                        { question: "ใครเป็นผู้ช่วยชีวิตมดที่กำลังจมน้ำ?", options: ["กบ", "นกพิราบ", "ปลา", "เต่า"], answer: 1 },
+                        { question: "นกพิราบช่วยมดด้วยวิธีการใด?", options: ["บินโฉบลงไปคาบขึ้นมา", "โยนใบไม้ลงไปให้มดเกาะ", "ร้องเรียกให้คนมาช่วย", "ใช้ปีกพัดน้ำให้แห้ง"], answer: 1 },
+                        { question: "ในเวลาต่อมามดตอบแทนบุญคุณนกพิราบอย่างไร?", options: ["หาอาหารมาให้", "เตือนภัยล่วงหน้า", "กัดเท้านายพรานที่กำลังจะยิงนก", "ช่วยซ่อมรังนก"], answer: 2 }
+                    ]
+                },
+                {
+                    text: "พ่อค้า ขับ ลา บรรทุก เกลือ ข้าม แม่น้ำ \nลา ลื่น ตก น้ำ เกลือ จึง ละลาย หาย ไป \nลา รู้สึก เบา สบาย เมื่อ ลุก ขึ้น ยืน \nวันต่อมา ลา จึง แกล้ง ลื่น ตก น้ำ อีก \nพ่อค้า รู้ทัน จึง เปลี่ยน เป็น บรรทุก นุ่น แทน",
+                    questions: [
+                        { question: "ในการข้ามแม่น้ำครั้งแรก เหตุใดภาระบนหลังลาจึงเบาลง?", options: ["เกลือละลายน้ำหายไป", "พ่อค้าเอาของลง", "กระสอบขาดของหล่น", "ลาแข็งแรงขึ้น"], answer: 0 },
+                        { question: "ลาแสดงความเจ้าเล่ห์อย่างไรในวันต่อมา?", options: ["แกล้งเดินกะเผลก", "แกล้งลื่นตกน้ำอีกเพื่อจะได้สบาย", "วิ่งหนีเข้าป่า", "กัดพ่อค้า"], answer: 1 },
+                        { question: "พ่อค้าแก้เผ็ดความเจ้าเล่ห์ของลาด้วยวิธีใด?", options: ["ตีลาอย่างหนัก", "บรรทุกหินก้อนใหญ่", "เปลี่ยนเป็นบรรทุกนุ่นซึ่งจะดูดน้ำและหนักขึ้น", "ไม่ให้ลากินอาหาร"], answer: 2 }
+                    ]
+                }
             ]
         };
 
         // โครงสร้างคีย์บอร์ด (Layout) แป้นพิมพ์เกษมณี
-        // แก้ไข: เพิ่มปุ่ม ่ (ไม้เอก) และ ้ (ไม้โท) ที่แป้นเหย้า J และ H ซึ่งขาดหายไปจากต้นฉบับ
-        // พร้อมปุ่ม Shift ที่ถูกต้องตามผังจริง: J+Shift = ๋ (ไม้จัตวา), และ ี+Shift = ๊ (ไม้ตรี) อยู่แล้วในแถวที่ 2
         const keyboardLayout = [
             [
                 { base: '_', shift: '%', finger: 'l4' }, { base: 'ๅ', shift: '+', finger: 'l4' }, { base: '/', shift: '๑', finger: 'l4' },
@@ -456,9 +835,11 @@
         let currentText = "";
         let currentIndex = 0;
         let isPlaying = false;
-        let currentLevel = 1; // จำระดับปัจจุบัน
-        let previousText = ""; // จำคำก่อนหน้าเพื่อไม่ให้สุ่มซ้ำ
-        let streak = 0; // จำนวนตัวอักษรที่พิมพ์ถูกต่อเนื่อง
+        let currentLevel = 1;
+        let previousText = "";
+        let streak = 0;
+        let currentQuizData = null; // เก็บข้อมูลคำถามจับใจความปัจจุบัน
+        let currentQuestionIndex = 0; // เก็บข้อคำถามปัจจุบันที่กำลังแสดง
 
         // ระบบเก็บสถิติแยกตามระดับ
         let stats = {
@@ -495,7 +876,7 @@
             badge.classList.toggle('lit', streak > 0);
             if (popped) {
                 badge.classList.remove('pop');
-                void badge.offsetWidth; // reflow เพื่อเล่นแอนิเมชันซ้ำได้
+                void badge.offsetWidth;
                 badge.classList.add('pop');
             }
         }
@@ -530,7 +911,6 @@
             const kbContainer = document.getElementById('keyboard');
             kbContainer.innerHTML = '';
 
-            // ระยะเยื้องแต่ละแถวให้ใกล้เคียงแป้นพิมพ์จริง (แถวตัวเลขชิดซ้ายสุด ถัดไปเยื้องขวาไปเรื่อยๆ)
             const rowOffsets = [
                 '0',
                 'clamp(0.6rem, 1.8vw, 1.7rem)',
@@ -547,7 +927,7 @@
                     rowDiv.style.justifyContent = 'flex-start';
                 }
 
-                row.forEach(key => {
+                row.forEach((key, colIndex) => {
                     const keyDiv = document.createElement('div');
                     keyDiv.className = `key finger-${key.finger}`;
 
@@ -563,7 +943,7 @@
                         keyDiv.classList.add('key-shift-btn', 'key-shift');
                     } else {
                         keyDiv.innerHTML = `<span class="shift-char">${key.shift}</span><span class="base-char">${key.base}</span>`;
-                        keyDiv.id = `key-${key.base}`; // ใช้ base char เป็น ID สำหรับหาปุ่ม
+                        keyDiv.id = `key-${rowIndex}-${colIndex}`;
                     }
 
                     rowDiv.appendChild(keyDiv);
@@ -616,42 +996,97 @@
             }
         }
 
+        // ฟังก์ชันเลือกด่านจากหน้าจอเริ่มต้น
+        function selectLevelFromMenu(level) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('start-screen').classList.add('hidden-screen');
+            startGame(level);
+        }
+
+        // ฟังก์ชันเปิดหน้าจอเริ่มต้น (หน้าแรก)
+        function showStartScreen() {
+            isPlaying = false;
+            document.getElementById('start-screen').classList.remove('hidden-screen');
+            document.getElementById('quiz-modal').style.display = 'none';
+        }
+
         // ฟังก์ชันเริ่มด่านและสุ่มคำแบบไม่ให้ซ้ำ
         function startGame(level) {
             currentLevel = level;
-            const levelWords = words[level];
+            const levelItems = words[level];
+            document.getElementById('quiz-modal').style.display = 'none';
 
-            // สุ่มจนกว่าจะไม่ได้คำ/บทความเดิมที่เพิ่งพิมพ์ไป
-            let randomIndex;
+            let chosenItem;
             do {
-                randomIndex = Math.floor(Math.random() * levelWords.length);
-            } while (levelWords[randomIndex] === previousText && levelWords.length > 1);
+                const randomIndex = Math.floor(Math.random() * levelItems.length);
+                chosenItem = levelItems[randomIndex];
+            } while ((chosenItem.text || chosenItem) === previousText && levelItems.length > 1);
 
-            currentText = levelWords[randomIndex];
-            previousText = currentText; // เก็บไว้เช็คในรอบถัดไป
+            if (level === 3) {
+                currentText = chosenItem.text;
+                currentQuizData = chosenItem;
+                currentQuestionIndex = 0; // รีเซ็ตข้อคำถามเมื่อเริ่มเรื่องใหม่
+            } else {
+                currentText = chosenItem;
+                currentQuizData = null;
+            }
+
+            previousText = currentText;
             currentIndex = 0;
-            isPlaying = true; // เปิดสถานะเกมให้สามารถพิมพ์ได้
+            isPlaying = true;
 
-            updateStatsUI(); // ดึงสถิติของด่านปัจจุบันมาแสดง
+            updateStatsUI();
             updateLevelButtons();
 
-            // ปรับขนาดตัวอักษรตามความยาวบทความ
             const displayDiv = document.getElementById('text-display');
             if(level === 3) {
-                displayDiv.style.fontSize = 'clamp(0.95rem, 2.6vh, 1.3rem)';
+                displayDiv.style.fontSize = 'clamp(1.15rem, 3.2vh, 1.65rem)';
                 displayDiv.style.textAlign = 'left';
-                displayDiv.style.lineHeight = '1.5';
-            } else {
-                displayDiv.style.fontSize = 'clamp(1.2rem, 4.5vh, 2.2rem)';
+                displayDiv.style.lineHeight = '1.65';
+            } else if(level === 2) {
+                displayDiv.style.fontSize = 'clamp(1.6rem, 5vh, 2.75rem)';
                 displayDiv.style.textAlign = 'center';
-                displayDiv.style.lineHeight = '1.6';
+                displayDiv.style.lineHeight = '1.7';
+            } else {
+                displayDiv.style.fontSize = 'clamp(2rem, 6.5vh, 3.6rem)';
+                displayDiv.style.textAlign = 'center';
+                displayDiv.style.lineHeight = '1.7';
             }
 
             renderText();
             updateHighlight();
         }
 
-        // แสดงข้อความบนจอ
+        const combiningChars = new Set(['ั', 'ิ', 'ี', 'ึ', 'ื', 'ุ', 'ู', '็', '่', '้', '๊', '๋', '์', 'ํ', 'ฺ']);
+        const lowerCombiningChars = new Set(['ุ', 'ู']);
+
+        function updateCursorCharHighlight() {
+            const spans = document.getElementById('text-display').childNodes;
+            spans.forEach(s => s.classList.remove('current', 'base-active', 'upper-combining', 'lower-combining'));
+
+            if (currentIndex >= spans.length) return;
+
+            const currentTargetChar = currentText[currentIndex];
+            const currentSpan = spans[currentIndex];
+            currentSpan.classList.add('current');
+
+            if (combiningChars.has(currentTargetChar)) {
+                if (lowerCombiningChars.has(currentTargetChar)) {
+                    currentSpan.classList.add('lower-combining');
+                } else {
+                    currentSpan.classList.add('upper-combining');
+                }
+
+                let baseIdx = currentIndex - 1;
+                while (baseIdx >= 0 && combiningChars.has(currentText[baseIdx])) {
+                    baseIdx--;
+                }
+                if (baseIdx >= 0 && spans[baseIdx]) {
+                    spans[baseIdx].classList.add('base-active');
+                }
+            }
+        }
+
         function renderText() {
             const display = document.getElementById('text-display');
             display.innerHTML = '';
@@ -659,6 +1094,10 @@
             Array.from(currentText).forEach((char, index) => {
                 const span = document.createElement('span');
                 span.className = 'char';
+
+                if (combiningChars.has(char)) {
+                    span.classList.add('combining-char');
+                }
 
                 if (char === ' ') {
                     span.innerText = ' ';
@@ -668,12 +1107,12 @@
                     span.innerText = char;
                 }
 
-                if (index === currentIndex) span.classList.add('current');
                 display.appendChild(span);
             });
+
+            updateCursorCharHighlight();
         }
 
-        // หาว่าตัวอักษรนี้อยู่ที่ปุ่มไหน และต้องกด Shift ไหม
         function findKeyInfo(charToFind) {
             if (charToFind === ' ') return { id: 'key-Space', shift: false };
             if (charToFind === '\n') return { id: 'key-Enter', shift: false };
@@ -681,14 +1120,13 @@
             for (let r = 0; r < keyboardLayout.length; r++) {
                 for (let k = 0; k < keyboardLayout[r].length; k++) {
                     const key = keyboardLayout[r][k];
-                    if (key.base === charToFind) return { id: `key-${key.base}`, shift: false };
-                    if (key.shift === charToFind) return { id: `key-${key.base}`, shift: true };
+                    if (key.base === charToFind) return { id: `key-${r}-${k}`, shift: false };
+                    if (key.shift === charToFind) return { id: `key-${r}-${k}`, shift: true };
                 }
             }
             return null;
         }
 
-        // อัปเดตไฮไลท์แป้นพิมพ์เพื่อใบ้
         function updateHighlight() {
             document.querySelectorAll('.key').forEach(k => {
                 k.classList.remove('glow', 'glow-shift');
@@ -708,6 +1146,95 @@
                         btn.classList.add('glow-shift');
                     });
                 }
+            }
+        }
+
+        // แสดงคำถามจับใจความเมื่อพิมพ์เลเวล 3 จบ
+        function showQuizModal() {
+            if (!currentQuizData || !currentQuizData.questions || currentQuizData.questions.length === 0) return;
+            const modal = document.getElementById('quiz-modal');
+            const qText = document.getElementById('quiz-question-text');
+            const grid = document.getElementById('quiz-options-grid');
+            const feedback = document.getElementById('quiz-feedback');
+            const title = document.getElementById('quiz-title');
+
+            const currentQ = currentQuizData.questions[currentQuestionIndex];
+
+            // อัปเดตหัวข้อให้แสดงว่าอยู่ข้อที่เท่าไหร่
+            if (title) {
+                title.innerText = `ทดสอบจับใจความ (${currentQuestionIndex + 1}/${currentQuizData.questions.length})`;
+            }
+
+            qText.innerText = currentQ.question;
+            grid.innerHTML = '';
+            feedback.innerText = '';
+
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full p-3 rounded-xl text-left font-semibold text-sm md:text-base transition border-2 border-[#E3D2FF] bg-[#FAF5FF] hover:bg-[#F0DEFF]';
+                btn.style.color = 'var(--ink)';
+                btn.innerHTML = `<span class="inline-block w-6 h-6 rounded-full text-center mr-2 text-xs font-bold leading-6" style="background:#CDB2FF; color:#40158A;">${idx + 1}</span> ${opt}`;
+                
+                btn.onclick = () => checkQuizAnswer(idx, btn);
+                grid.appendChild(btn);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        // ตรวจสอบคำตอบของนักเรียน
+        function checkQuizAnswer(selectedIndex, btnElement) {
+            const feedback = document.getElementById('quiz-feedback');
+            const allBtns = document.querySelectorAll('#quiz-options-grid button');
+
+            allBtns.forEach(b => b.style.pointerEvents = 'none'); // ล็อคปุ่มกันกดซ้ำ
+
+            const currentQ = currentQuizData.questions[currentQuestionIndex];
+
+            if (selectedIndex === currentQ.answer) {
+                playSound('correct');
+                btnElement.style.background = '#E4F7EC';
+                btnElement.style.borderColor = '#2FA968';
+                btnElement.style.color = '#1B7A45';
+                
+                if (currentQuestionIndex < currentQuizData.questions.length - 1) {
+                    feedback.innerHTML = '<span style="color:#2FA968;">🎉 ถูกต้อง! เตรียมตัวไปข้อต่อไป...</span>';
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        showQuizModal();
+                    }, 1400);
+                } else {
+                    feedback.innerHTML = '<span style="color:#2FA968;">🎉 ยอดเยี่ยม! ตอบถูกหมดเลย ไปลุยเรื่องต่อไปกัน!</span>';
+                    setTimeout(() => {
+                        document.getElementById('quiz-modal').style.display = 'none';
+                        startGame(3);
+                    }, 1800);
+                }
+            } else {
+                playSound('wrong');
+                btnElement.style.background = '#FFE9ED';
+                btnElement.style.borderColor = '#FF4D6D';
+                btnElement.style.color = '#B31432';
+                
+                if (currentQuestionIndex < currentQuizData.questions.length - 1) {
+                    feedback.innerHTML = '<span style="color:#FF4D6D;">❌ ยังไม่ถูกต้องน้า! ลองข้อต่อไปสิ</span>';
+                } else {
+                    feedback.innerHTML = '<span style="color:#FF4D6D;">❌ ยังไม่ถูกต้อง จบเกมแล้ว!</span>';
+                }
+
+                // เฉลยข้อที่ถูก
+                allBtns[currentQ.answer].style.background = '#E4F7EC';
+                allBtns[currentQ.answer].style.borderColor = '#2FA968';
+
+                setTimeout(() => {
+                    if (currentQuestionIndex < currentQuizData.questions.length - 1) {
+                        currentQuestionIndex++;
+                        showQuizModal();
+                    } else {
+                        document.getElementById('quiz-modal').style.display = 'none';
+                        startGame(3);
+                    }
+                }, 2200);
             }
         }
 
@@ -743,7 +1270,6 @@
                 }
                 updateStatsUI();
 
-                // อัปเดต streak/combo
                 streak++;
                 const milestone = streak > 0 && streak % 10 === 0;
                 updateStreakUI(milestone);
@@ -766,9 +1292,10 @@
                 currentIndex++;
 
                 if (currentIndex < currentText.length) {
-                    spans[currentIndex].classList.add('current');
+                    updateCursorCharHighlight();
                     updateHighlight();
                 } else {
+                    spans.forEach(s => s.classList.remove('current', 'base-active'));
                     isPlaying = false;
                     document.querySelectorAll('.key').forEach(k => k.classList.remove('glow', 'glow-shift'));
                     playSound('win');
@@ -779,7 +1306,11 @@
 
                     setTimeout(() => {
                         container.classList.remove('flash-win');
-                        startGame(currentLevel);
+                        if (currentLevel === 3 && currentQuizData) {
+                            showQuizModal();
+                        } else {
+                            startGame(currentLevel);
+                        }
                     }, 800);
                 }
             } else {
@@ -805,7 +1336,6 @@
             }
         });
 
-        // สร้างคีย์บอร์ดตอนโหลดหน้าเว็บ
         renderKeyboard();
         updateStatsUI();
         updateStreakUI(false);
